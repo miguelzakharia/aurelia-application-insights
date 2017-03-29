@@ -12,6 +12,9 @@ yarn add aurelia-application-insights
 
 # or ...
 npm install aurelia-application-insights --save
+
+# or ...
+jspm install aurelia-application-insights
 ```
 
 * Use the plugin in your app's main.js:
