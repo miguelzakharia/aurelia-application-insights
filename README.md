@@ -27,6 +27,9 @@ export function configure(aurelia) {
 				logging: {
 					enabled: true // Set to `true` to have some log messages appear in the browser console.
 				},
+				logForwarding: {
+					enabled: true // Set to `true` to have logged messages and exceptions sent to app inights.
+				},
 				pageTracking: {
 					enabled: true // Set to `false` to disable in non-production environments.
 				},
