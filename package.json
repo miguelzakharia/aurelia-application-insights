@@ -1,6 +1,6 @@
 {
   "name": "aurelia-application-insights",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "An Aurelia plugin that adds Microsoft Application Insights page and click tracking to your application.",
   "keywords": [
     "analytics",
