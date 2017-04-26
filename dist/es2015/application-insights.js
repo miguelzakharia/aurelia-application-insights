@@ -5,6 +5,7 @@ import { EventAggregator } from "aurelia-event-aggregator";
 import * as LogManager from "aurelia-logging";
 import deepmerge from "deepmerge";
 import { AppInsights } from "applicationinsights-js";
+import AppInsightsAppender from "./logAppender";
 
 const criteria = {
 	isElement: function (e) {
@@ -31,6 +32,9 @@ const criteria = {
 
 const defaultOptions = {
 	logging: {
+		enabled: true
+	},
+	logForwarding: {
 		enabled: true
 	},
 	pageTracking: {
@@ -80,6 +84,10 @@ export let ApplicationInsights = (_dec = inject(EventAggregator), _dec(_class = 
 		this._trackPage = this._trackPage.bind(this);
 	}
 
+	get initialized() {
+		return this._initialized;
+	}
+
 	attach(options = defaultOptions) {
 		this._options = deepmerge(defaultOptions, options);
 		if (!this._initialized) {
@@ -90,6 +98,10 @@ export let ApplicationInsights = (_dec = inject(EventAggregator), _dec(_class = 
 
 		this._attachClickTracker();
 		this._attachPageTracker();
+
+		if (this._options.logForwarding.enabled) {
+			LogManager.addAppender(new AppInsightsAppender(this));
+		}
 	}
 
 	init(key) {

@@ -1,9 +1,9 @@
 "use strict";
 
-System.register(["aurelia-dependency-injection", "aurelia-event-aggregator", "aurelia-logging", "deepmerge", "applicationinsights-js"], function (_export, _context) {
+System.register(["aurelia-dependency-injection", "aurelia-event-aggregator", "aurelia-logging", "deepmerge", "applicationinsights-js", "./logAppender"], function (_export, _context) {
 	"use strict";
 
-	var inject, EventAggregator, LogManager, deepmerge, AppInsights, _dec, _class, criteria, defaultOptions, delegate, ApplicationInsights;
+	var inject, EventAggregator, LogManager, deepmerge, AppInsights, AppInsightsAppender, _createClass, _dec, _class, criteria, defaultOptions, delegate, ApplicationInsights;
 
 	function _classCallCheck(instance, Constructor) {
 		if (!(instance instanceof Constructor)) {
@@ -32,8 +32,28 @@ System.register(["aurelia-dependency-injection", "aurelia-event-aggregator", "au
 			deepmerge = _deepmerge.default;
 		}, function (_applicationinsightsJs) {
 			AppInsights = _applicationinsightsJs.AppInsights;
+		}, function (_logAppender) {
+			AppInsightsAppender = _logAppender.default;
 		}],
 		execute: function () {
+			_createClass = function () {
+				function defineProperties(target, props) {
+					for (var i = 0; i < props.length; i++) {
+						var descriptor = props[i];
+						descriptor.enumerable = descriptor.enumerable || false;
+						descriptor.configurable = true;
+						if ("value" in descriptor) descriptor.writable = true;
+						Object.defineProperty(target, descriptor.key, descriptor);
+					}
+				}
+
+				return function (Constructor, protoProps, staticProps) {
+					if (protoProps) defineProperties(Constructor.prototype, protoProps);
+					if (staticProps) defineProperties(Constructor, staticProps);
+					return Constructor;
+				};
+			}();
+
 			criteria = {
 				isElement: function isElement(e) {
 					return e instanceof HTMLElement;
@@ -58,6 +78,9 @@ System.register(["aurelia-dependency-injection", "aurelia-event-aggregator", "au
 			};
 			defaultOptions = {
 				logging: {
+					enabled: true
+				},
+				logForwarding: {
 					enabled: true
 				},
 				pageTracking: {
@@ -111,6 +134,10 @@ System.register(["aurelia-dependency-injection", "aurelia-event-aggregator", "au
 
 					this._attachClickTracker();
 					this._attachPageTracker();
+
+					if (this._options.logForwarding.enabled) {
+						LogManager.addAppender(new AppInsightsAppender(this));
+					}
 				};
 
 				ApplicationInsights.prototype.init = function init(key) {
@@ -175,6 +202,13 @@ System.register(["aurelia-dependency-injection", "aurelia-event-aggregator", "au
 					this._log("debug", "Tracking path = " + path + ", title = " + title);
 					AppInsights.trackPageView(title, path);
 				};
+
+				_createClass(ApplicationInsights, [{
+					key: "initialized",
+					get: function get() {
+						return this._initialized;
+					}
+				}]);
 
 				return ApplicationInsights;
 			}()) || _class));

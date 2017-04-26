@@ -1,4 +1,4 @@
-define(["exports", "aurelia-dependency-injection", "aurelia-event-aggregator", "aurelia-logging", "deepmerge", "applicationinsights-js"], function (exports, _aureliaDependencyInjection, _aureliaEventAggregator, _aureliaLogging, _deepmerge, _applicationinsightsJs) {
+define(["exports", "aurelia-dependency-injection", "aurelia-event-aggregator", "aurelia-logging", "deepmerge", "applicationinsights-js", "./logAppender"], function (exports, _aureliaDependencyInjection, _aureliaEventAggregator, _aureliaLogging, _deepmerge, _applicationinsightsJs, _logAppender) {
 	"use strict";
 
 	Object.defineProperty(exports, "__esModule", {
@@ -9,6 +9,8 @@ define(["exports", "aurelia-dependency-injection", "aurelia-event-aggregator", "
 	var LogManager = _interopRequireWildcard(_aureliaLogging);
 
 	var _deepmerge2 = _interopRequireDefault(_deepmerge);
+
+	var _logAppender2 = _interopRequireDefault(_logAppender);
 
 	function _interopRequireDefault(obj) {
 		return obj && obj.__esModule ? obj : {
@@ -39,6 +41,24 @@ define(["exports", "aurelia-dependency-injection", "aurelia-event-aggregator", "
 		}
 	}
 
+	var _createClass = function () {
+		function defineProperties(target, props) {
+			for (var i = 0; i < props.length; i++) {
+				var descriptor = props[i];
+				descriptor.enumerable = descriptor.enumerable || false;
+				descriptor.configurable = true;
+				if ("value" in descriptor) descriptor.writable = true;
+				Object.defineProperty(target, descriptor.key, descriptor);
+			}
+		}
+
+		return function (Constructor, protoProps, staticProps) {
+			if (protoProps) defineProperties(Constructor.prototype, protoProps);
+			if (staticProps) defineProperties(Constructor, staticProps);
+			return Constructor;
+		};
+	}();
+
 	var _dec, _class;
 
 	var criteria = {
@@ -66,6 +86,9 @@ define(["exports", "aurelia-dependency-injection", "aurelia-event-aggregator", "
 
 	var defaultOptions = {
 		logging: {
+			enabled: true
+		},
+		logForwarding: {
 			enabled: true
 		},
 		pageTracking: {
@@ -129,6 +152,10 @@ define(["exports", "aurelia-dependency-injection", "aurelia-event-aggregator", "
 
 			this._attachClickTracker();
 			this._attachPageTracker();
+
+			if (this._options.logForwarding.enabled) {
+				LogManager.addAppender(new _logAppender2.default(this));
+			}
 		};
 
 		ApplicationInsights.prototype.init = function init(key) {
@@ -193,6 +220,13 @@ define(["exports", "aurelia-dependency-injection", "aurelia-event-aggregator", "
 			this._log("debug", "Tracking path = " + path + ", title = " + title);
 			_applicationinsightsJs.AppInsights.trackPageView(title, path);
 		};
+
+		_createClass(ApplicationInsights, [{
+			key: "initialized",
+			get: function get() {
+				return this._initialized;
+			}
+		}]);
 
 		return ApplicationInsights;
 	}()) || _class);

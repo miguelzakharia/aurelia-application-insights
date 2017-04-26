@@ -5,6 +5,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.ApplicationInsights = undefined;
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 var _dec, _class;
 
 var _aureliaDependencyInjection = require("aurelia-dependency-injection");
@@ -20,6 +22,10 @@ var _deepmerge = require("deepmerge");
 var _deepmerge2 = _interopRequireDefault(_deepmerge);
 
 var _applicationinsightsJs = require("applicationinsights-js");
+
+var _logAppender = require("./logAppender");
+
+var _logAppender2 = _interopRequireDefault(_logAppender);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -52,6 +58,9 @@ var criteria = {
 
 var defaultOptions = {
 	logging: {
+		enabled: true
+	},
+	logForwarding: {
 		enabled: true
 	},
 	pageTracking: {
@@ -115,6 +124,10 @@ var ApplicationInsights = exports.ApplicationInsights = (_dec = (0, _aureliaDepe
 
 		this._attachClickTracker();
 		this._attachPageTracker();
+
+		if (this._options.logForwarding.enabled) {
+			LogManager.addAppender(new _logAppender2.default(this));
+		}
 	};
 
 	ApplicationInsights.prototype.init = function init(key) {
@@ -179,6 +192,13 @@ var ApplicationInsights = exports.ApplicationInsights = (_dec = (0, _aureliaDepe
 		this._log("debug", "Tracking path = " + path + ", title = " + title);
 		_applicationinsightsJs.AppInsights.trackPageView(title, path);
 	};
+
+	_createClass(ApplicationInsights, [{
+		key: "initialized",
+		get: function get() {
+			return this._initialized;
+		}
+	}]);
 
 	return ApplicationInsights;
 }()) || _class);
