@@ -16,12 +16,16 @@ import deepmerge from "deepmerge";
 import {
 	AppInsights
 } from "applicationinsights-js";
+import AppInsightsAppender from "./logAppender";
 
 /* Example
 .plugin('aurelia-google-analytics', config => {
 	config.init('<Tracker ID here>');
 	config.attach({
 		logging: {
+			enabled: true
+		},
+		logForwarding: {
 			enabled: true
 		},
 		pageTracking: {
@@ -68,6 +72,9 @@ const criteria = {
 
 const defaultOptions = {
 	logging: {
+		enabled: true
+	},
+	logForwarding: {
 		enabled: true
 	},
 	pageTracking: {
@@ -120,6 +127,10 @@ export class ApplicationInsights {
 		this._trackPage = this._trackPage.bind(this);
 	}
 
+	get initialized() {
+		return this._initialized;
+	}
+
 	attach(options = defaultOptions) {
 		this._options = deepmerge(defaultOptions, options);
 		if (!this._initialized) {
@@ -130,6 +141,10 @@ export class ApplicationInsights {
 
 		this._attachClickTracker();
 		this._attachPageTracker();
+
+		if (this._options.logForwarding.enabled) {
+			LogManager.addAppender(new AppInsightsAppender(this));
+		}
 	}
 
 	init(key) {

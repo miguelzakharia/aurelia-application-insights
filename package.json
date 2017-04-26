@@ -1,20 +1,20 @@
 {
-	"name": "aurelia-application-insights",
-	"version": "1.0.0",
-	"description": "An Aurelia plugin that adds Microsoft Application Insights page and click tracking to your application.",
-	"keywords": [
-		"analytics",
-		"tracking",
-		"aurelia",
-		"insights"
-	],
-	"homepage": "https://github.com/miguelzakharia/aurelia-application-insights",
-	"bugs": {
-		"url": "https://github.com/miguelzakharia/aurelia-application-insights/issues"
-	},
-	"license": "MIT",
-	"author": "Miguel Zakharia <miguel@zakharia.me> (http://miguel.zakharia.me)",
-	"main": "dist/amd",
+  "name": "aurelia-application-insights",
+  "version": "1.0.0",
+  "description": "An Aurelia plugin that adds Microsoft Application Insights page and click tracking to your application.",
+  "keywords": [
+    "analytics",
+    "tracking",
+    "aurelia",
+    "insights"
+  ],
+  "homepage": "https://github.com/miguelzakharia/aurelia-application-insights",
+  "bugs": {
+    "url": "https://github.com/miguelzakharia/aurelia-application-insights/issues"
+  },
+  "license": "MIT",
+  "author": "Miguel Zakharia <miguel@zakharia.me> (http://miguel.zakharia.me)",
+  "main": "dist/amd",
   "repository": {
     "type": "git",
     "url": "https://github.com/miguelzakharia/aurelia-application-insights"
@@ -37,6 +37,7 @@
     "gulp-bump": "^2.7.0",
     "gulp-eslint": "^3.0.1",
     "gulp-yuidoc": "^0.1.2",
+    "karma": "^1.6.0",
     "object.assign": "^4.0.4",
     "require-dir": "^0.3.1",
     "run-sequence": "^1.2.2",
