@@ -51,6 +51,9 @@
     "aurelia-logging": "^1.2.0",
     "deepmerge": "^1.3.2"
   },
+  "peerDependencies": {
+    "aurelia-framework": "^1.1.2"
+  },
   "jspm": {
     "registry": "npm",
     "main": "index",
