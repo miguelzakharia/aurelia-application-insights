@@ -17,6 +17,9 @@ import {
 	AppInsights
 } from "applicationinsights-js";
 import AppInsightsAppender from "./logAppender";
+import {
+	dataKey
+} from "./appinsights-props";
 
 /* Example
 .plugin('aurelia-google-analytics', config => {
@@ -56,7 +59,8 @@ const criteria = {
 		};
 	},
 	hasTrackingInfo: function (e) {
-		return criteria.isElement(e) && getAttributesLike('data-appinsights-', e.attributes).length > 0;
+		return criteria.isElement(e) && 
+			(getAttributesLike('data-appinsights-', e.attributes).length > 0 || hasTrackProps(e));
 	},
 	isOfType: function (e, type) {
 		return criteria.isElement(e) &&
@@ -101,6 +105,10 @@ function getAttributesLike(partial, attributes) {
 		}
 	}
 	return results;
+}
+
+function hasTrackProps(element) {
+	return element.dataset[dataKey] != null && element.dataset[dataKey] != '';
 }
 
 const delegate = function (criteria, listener) {
@@ -207,6 +215,15 @@ export class ApplicationInsights {
 		matches.forEach(match =>
 			dimensions[match.name.toLowerCase().replace('data-appinsights-', '')] = match.value
 		);
+		
+		if (hasTrackProps(element)) {
+			const props = JSON.stringify(element.dataset[dataKey]);
+			for (const propKey in props) {
+				if (props.hasOwnProperty(propKey)) {
+					dimensions[propKey] = props[propKey];
+				}
+			}
+		}
 
 		this._log("debug", dimensions);
 		AppInsights.trackEvent('click', dimensions);
