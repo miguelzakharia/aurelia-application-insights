@@ -155,8 +155,12 @@ export class ApplicationInsights {
 		}
 	}
 
-	init(key) {
-		AppInsights.downloadAndSetup({ instrumentationKey: key });
+	init(options) {
+		if (!options || !options.instrumentationKey) { 
+			throw new Error('Options, including an instrumentationKey is required');
+		}
+		
+		AppInsights.downloadAndSetup(options);
 		this._initialized = true;
 	}
 

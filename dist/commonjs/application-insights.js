@@ -27,6 +27,8 @@ var _logAppender = require("./logAppender");
 
 var _logAppender2 = _interopRequireDefault(_logAppender);
 
+var _appinsightsProps = require("./appinsights-props");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
@@ -43,7 +45,7 @@ var criteria = {
 		};
 	},
 	hasTrackingInfo: function hasTrackingInfo(e) {
-		return criteria.isElement(e) && getAttributesLike('data-appinsights-', e.attributes).length > 0;
+		return criteria.isElement(e) && (getAttributesLike('data-appinsights-', e.attributes).length > 0 || hasTrackProps(e));
 	},
 	isOfType: function isOfType(e, type) {
 		return criteria.isElement(e) && e.nodeName.toLowerCase() === type.toLowerCase();
@@ -85,6 +87,10 @@ function getAttributesLike(partial, attributes) {
 		}
 	}
 	return results;
+}
+
+function hasTrackProps(element) {
+	return element.dataset[_appinsightsProps.dataKey] != null && element.dataset[_appinsightsProps.dataKey] != '';
 }
 
 var delegate = function delegate(criteria, listener) {
@@ -130,8 +136,12 @@ var ApplicationInsights = exports.ApplicationInsights = (_dec = (0, _aureliaDepe
 		}
 	};
 
-	ApplicationInsights.prototype.init = function init(key) {
-		_applicationinsightsJs.AppInsights.downloadAndSetup({ instrumentationKey: key });
+	ApplicationInsights.prototype.init = function init(options) {
+		if (!options || !options.instrumentationKey) {
+			throw new Error('Options, including an instrumentationKey is required');
+		}
+
+		_applicationinsightsJs.AppInsights.downloadAndSetup(options);
 		this._initialized = true;
 	};
 
@@ -178,6 +188,15 @@ var ApplicationInsights = exports.ApplicationInsights = (_dec = (0, _aureliaDepe
 		matches.forEach(function (match) {
 			return dimensions[match.name.toLowerCase().replace('data-appinsights-', '')] = match.value;
 		});
+
+		if (hasTrackProps(element)) {
+			var props = JSON.stringify(element.dataset[_appinsightsProps.dataKey]);
+			for (var propKey in props) {
+				if (props.hasOwnProperty(propKey)) {
+					dimensions[propKey] = props[propKey];
+				}
+			}
+		}
 
 		this._log("debug", dimensions);
 		_applicationinsightsJs.AppInsights.trackEvent('click', dimensions);

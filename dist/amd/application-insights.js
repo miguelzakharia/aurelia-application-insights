@@ -1,4 +1,4 @@
-define(["exports", "aurelia-dependency-injection", "aurelia-event-aggregator", "aurelia-logging", "deepmerge", "applicationinsights-js", "./logAppender"], function (exports, _aureliaDependencyInjection, _aureliaEventAggregator, _aureliaLogging, _deepmerge, _applicationinsightsJs, _logAppender) {
+define(["exports", "aurelia-dependency-injection", "aurelia-event-aggregator", "aurelia-logging", "deepmerge", "applicationinsights-js", "./logAppender", "./appinsights-props"], function (exports, _aureliaDependencyInjection, _aureliaEventAggregator, _aureliaLogging, _deepmerge, _applicationinsightsJs, _logAppender, _appinsightsProps) {
 	"use strict";
 
 	Object.defineProperty(exports, "__esModule", {
@@ -71,7 +71,7 @@ define(["exports", "aurelia-dependency-injection", "aurelia-event-aggregator", "
 			};
 		},
 		hasTrackingInfo: function hasTrackingInfo(e) {
-			return criteria.isElement(e) && getAttributesLike('data-appinsights-', e.attributes).length > 0;
+			return criteria.isElement(e) && (getAttributesLike('data-appinsights-', e.attributes).length > 0 || hasTrackProps(e));
 		},
 		isOfType: function isOfType(e, type) {
 			return criteria.isElement(e) && e.nodeName.toLowerCase() === type.toLowerCase();
@@ -113,6 +113,10 @@ define(["exports", "aurelia-dependency-injection", "aurelia-event-aggregator", "
 			}
 		}
 		return results;
+	}
+
+	function hasTrackProps(element) {
+		return element.dataset[_appinsightsProps.dataKey] != null && element.dataset[_appinsightsProps.dataKey] != '';
 	}
 
 	var delegate = function delegate(criteria, listener) {
@@ -158,8 +162,12 @@ define(["exports", "aurelia-dependency-injection", "aurelia-event-aggregator", "
 			}
 		};
 
-		ApplicationInsights.prototype.init = function init(key) {
-			_applicationinsightsJs.AppInsights.downloadAndSetup({ instrumentationKey: key });
+		ApplicationInsights.prototype.init = function init(options) {
+			if (!options || !options.instrumentationKey) {
+				throw new Error('Options, including an instrumentationKey is required');
+			}
+
+			_applicationinsightsJs.AppInsights.downloadAndSetup(options);
 			this._initialized = true;
 		};
 
@@ -206,6 +214,15 @@ define(["exports", "aurelia-dependency-injection", "aurelia-event-aggregator", "
 			matches.forEach(function (match) {
 				return dimensions[match.name.toLowerCase().replace('data-appinsights-', '')] = match.value;
 			});
+
+			if (hasTrackProps(element)) {
+				var props = JSON.stringify(element.dataset[_appinsightsProps.dataKey]);
+				for (var propKey in props) {
+					if (props.hasOwnProperty(propKey)) {
+						dimensions[propKey] = props[propKey];
+					}
+				}
+			}
 
 			this._log("debug", dimensions);
 			_applicationinsightsJs.AppInsights.trackEvent('click', dimensions);

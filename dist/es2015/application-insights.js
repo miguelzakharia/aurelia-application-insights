@@ -6,6 +6,7 @@ import * as LogManager from "aurelia-logging";
 import deepmerge from "deepmerge";
 import { AppInsights } from "applicationinsights-js";
 import AppInsightsAppender from "./logAppender";
+import { dataKey } from "./appinsights-props";
 
 const criteria = {
 	isElement: function (e) {
@@ -17,7 +18,7 @@ const criteria = {
 		};
 	},
 	hasTrackingInfo: function (e) {
-		return criteria.isElement(e) && getAttributesLike('data-appinsights-', e.attributes).length > 0;
+		return criteria.isElement(e) && (getAttributesLike('data-appinsights-', e.attributes).length > 0 || hasTrackProps(e));
 	},
 	isOfType: function (e, type) {
 		return criteria.isElement(e) && e.nodeName.toLowerCase() === type.toLowerCase();
@@ -59,6 +60,10 @@ function getAttributesLike(partial, attributes) {
 		}
 	}
 	return results;
+}
+
+function hasTrackProps(element) {
+	return element.dataset[dataKey] != null && element.dataset[dataKey] != '';
 }
 
 const delegate = function (criteria, listener) {
@@ -104,8 +109,12 @@ export let ApplicationInsights = (_dec = inject(EventAggregator), _dec(_class = 
 		}
 	}
 
-	init(key) {
-		AppInsights.downloadAndSetup({ instrumentationKey: key });
+	init(options) {
+		if (!options || !options.instrumentationKey) {
+			throw new Error('Options, including an instrumentationKey is required');
+		}
+
+		AppInsights.downloadAndSetup(options);
 		this._initialized = true;
 	}
 
@@ -148,6 +157,15 @@ export let ApplicationInsights = (_dec = inject(EventAggregator), _dec(_class = 
 		const element = evt.delegateTarget;
 		const matches = getAttributesLike('data-appinsights-', element.attributes);
 		matches.forEach(match => dimensions[match.name.toLowerCase().replace('data-appinsights-', '')] = match.value);
+
+		if (hasTrackProps(element)) {
+			const props = JSON.stringify(element.dataset[dataKey]);
+			for (const propKey in props) {
+				if (props.hasOwnProperty(propKey)) {
+					dimensions[propKey] = props[propKey];
+				}
+			}
+		}
 
 		this._log("debug", dimensions);
 		AppInsights.trackEvent('click', dimensions);

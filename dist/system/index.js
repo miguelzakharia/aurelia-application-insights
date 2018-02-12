@@ -1,9 +1,9 @@
 'use strict';
 
-System.register(['./application-insights'], function (_export, _context) {
+System.register(['aurelia-framework', './application-insights'], function (_export, _context) {
   "use strict";
 
-  var ApplicationInsights;
+  var PLATFORM, ApplicationInsights;
   function configure(aurelia, configCallback) {
     try {
       var instance = aurelia.container.get(ApplicationInsights);
@@ -12,6 +12,8 @@ System.register(['./application-insights'], function (_export, _context) {
       }
 
       aurelia.singleton(instance);
+
+      aurelia.globalResources([PLATFORM.moduleName('./appinsights-props')]);
     } catch (err) {
       console.error("configure: %o", err);
     }
@@ -20,7 +22,9 @@ System.register(['./application-insights'], function (_export, _context) {
   _export('configure', configure);
 
   return {
-    setters: [function (_applicationInsights) {
+    setters: [function (_aureliaFramework) {
+      PLATFORM = _aureliaFramework.PLATFORM;
+    }, function (_applicationInsights) {
       ApplicationInsights = _applicationInsights.ApplicationInsights;
     }],
     execute: function () {}
