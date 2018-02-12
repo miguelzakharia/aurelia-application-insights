@@ -1,4 +1,4 @@
-define(['exports', './application-insights'], function (exports, _applicationInsights) {
+define(['exports', 'aurelia-framework', './application-insights'], function (exports, _aureliaFramework, _applicationInsights) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
@@ -13,6 +13,8 @@ define(['exports', './application-insights'], function (exports, _applicationIns
       }
 
       aurelia.singleton(instance);
+
+      aurelia.globalResources([_aureliaFramework.PLATFORM.moduleName('./appinsights-props')]);
     } catch (err) {
       console.error("configure: %o", err);
     }

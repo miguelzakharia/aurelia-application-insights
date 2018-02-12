@@ -1,9 +1,9 @@
 "use strict";
 
-System.register(["aurelia-dependency-injection", "aurelia-event-aggregator", "aurelia-logging", "deepmerge", "applicationinsights-js", "./logAppender"], function (_export, _context) {
+System.register(["aurelia-dependency-injection", "aurelia-event-aggregator", "aurelia-logging", "deepmerge", "applicationinsights-js", "./logAppender", "./appinsights-props"], function (_export, _context) {
 	"use strict";
 
-	var inject, EventAggregator, LogManager, deepmerge, AppInsights, AppInsightsAppender, _createClass, _dec, _class, criteria, defaultOptions, delegate, ApplicationInsights;
+	var inject, EventAggregator, LogManager, deepmerge, AppInsights, AppInsightsAppender, dataKey, _createClass, _dec, _class, criteria, defaultOptions, delegate, ApplicationInsights;
 
 	function _classCallCheck(instance, Constructor) {
 		if (!(instance instanceof Constructor)) {
@@ -21,6 +21,10 @@ System.register(["aurelia-dependency-injection", "aurelia-event-aggregator", "au
 		return results;
 	}
 
+	function hasTrackProps(element) {
+		return element.dataset[dataKey] != null && element.dataset[dataKey] != '';
+	}
+
 	return {
 		setters: [function (_aureliaDependencyInjection) {
 			inject = _aureliaDependencyInjection.inject;
@@ -34,6 +38,8 @@ System.register(["aurelia-dependency-injection", "aurelia-event-aggregator", "au
 			AppInsights = _applicationinsightsJs.AppInsights;
 		}, function (_logAppender) {
 			AppInsightsAppender = _logAppender.default;
+		}, function (_appinsightsProps) {
+			dataKey = _appinsightsProps.dataKey;
 		}],
 		execute: function () {
 			_createClass = function () {
@@ -64,7 +70,7 @@ System.register(["aurelia-dependency-injection", "aurelia-event-aggregator", "au
 					};
 				},
 				hasTrackingInfo: function hasTrackingInfo(e) {
-					return criteria.isElement(e) && getAttributesLike('data-appinsights-', e.attributes).length > 0;
+					return criteria.isElement(e) && (getAttributesLike('data-appinsights-', e.attributes).length > 0 || hasTrackProps(e));
 				},
 				isOfType: function isOfType(e, type) {
 					return criteria.isElement(e) && e.nodeName.toLowerCase() === type.toLowerCase();
@@ -140,8 +146,12 @@ System.register(["aurelia-dependency-injection", "aurelia-event-aggregator", "au
 					}
 				};
 
-				ApplicationInsights.prototype.init = function init(key) {
-					AppInsights.downloadAndSetup({ instrumentationKey: key });
+				ApplicationInsights.prototype.init = function init(options) {
+					if (!options || !options.instrumentationKey) {
+						throw new Error('Options, including an instrumentationKey is required');
+					}
+
+					AppInsights.downloadAndSetup(options);
 					this._initialized = true;
 				};
 
@@ -188,6 +198,15 @@ System.register(["aurelia-dependency-injection", "aurelia-event-aggregator", "au
 					matches.forEach(function (match) {
 						return dimensions[match.name.toLowerCase().replace('data-appinsights-', '')] = match.value;
 					});
+
+					if (hasTrackProps(element)) {
+						var props = JSON.stringify(element.dataset[dataKey]);
+						for (var propKey in props) {
+							if (props.hasOwnProperty(propKey)) {
+								dimensions[propKey] = props[propKey];
+							}
+						}
+					}
 
 					this._log("debug", dimensions);
 					AppInsights.trackEvent('click', dimensions);

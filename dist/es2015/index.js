@@ -1,3 +1,5 @@
+import { PLATFORM } from "aurelia-framework";
+
 import { ApplicationInsights } from './application-insights';
 
 export function configure(aurelia, configCallback) {
@@ -8,6 +10,8 @@ export function configure(aurelia, configCallback) {
     }
 
     aurelia.singleton(instance);
+
+    aurelia.globalResources([PLATFORM.moduleName('./appinsights-props')]);
   } catch (err) {
     console.error("configure: %o", err);
   }

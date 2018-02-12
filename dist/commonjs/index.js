@@ -5,6 +5,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.configure = configure;
 
+var _aureliaFramework = require('aurelia-framework');
+
 var _applicationInsights = require('./application-insights');
 
 function configure(aurelia, configCallback) {
@@ -15,6 +17,8 @@ function configure(aurelia, configCallback) {
     }
 
     aurelia.singleton(instance);
+
+    aurelia.globalResources([_aureliaFramework.PLATFORM.moduleName('./appinsights-props')]);
   } catch (err) {
     console.error("configure: %o", err);
   }
